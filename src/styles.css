@@ -1,0 +1,17 @@
+body,
+button,
+h1,
+h2,
+h3 {
+  font-family: monospace;
+}
+
+textarea,
+input {
+  border-radius: 15px;
+}
+
+hr {
+  border-top: 0px dashed #ccc;
+  color: transparent;
+}

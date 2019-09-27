@@ -1,0 +1,142 @@
+import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
+import Table from "./Table.js";
+import { parseDataDetails, parseData } from "../dataparse.js";
+
+function Modal({ name, modalBackgroundStyle, modalContentStyle, buttonStyle }) {
+  const [clicked, click] = useState(false);
+  const [content, setContent] = useState(
+    <Table title="Add Data To Create Table" />
+  );
+
+  // Hide or show the modal depending on user input, such as button press or
+  // clicking outside of the modal
+  useEffect(() => {
+    document.getElementById(name + "Modal").style.display = clicked
+      ? "block"
+      : "none";
+  });
+
+  // If the modal is open and the user clicks outside of the content, close the modal
+  useEffect(() => {
+    function windowClick(event) {
+      if (clicked && event.target.id === name + "Modal") click(!clicked);
+    }
+    window.addEventListener("click", windowClick);
+    return () => window.removeEventListener("click", windowClick);
+  });
+
+  return (
+    <React.Fragment>
+      {/* Regular header */}
+      <button
+        onClick={() => click(!clicked)}
+        style={{ ...buttonStyle, position: "absolute", margin: -5 }}
+        children={name}
+      />
+      {/* Regular content */}
+
+      {/* Modal */}
+      <div id={name + "Modal"} style={modalBackgroundStyle}>
+        {/* Header inside modal */}
+        <div
+          style={{
+            ...modalContentStyle,
+            display: "block",
+            padding: 15,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10
+          }}
+        >
+          <h2
+            children={
+              <React.Fragment>
+                <button
+                  onClick={() => click(!clicked)}
+                  style={{
+                    ...buttonStyle,
+                    float: "right",
+                    margin: -5,
+                    marginTop: -20
+                  }}
+                  children={`Close`}
+                />{" "}
+                {name}
+              </React.Fragment>
+            }
+          />
+        </div>
+        {/* Content inside modal */}
+        <div
+          id={name + "ModalContent"}
+          style={{ ...modalContentStyle, marginBottom: 200, paddingTop: 0 }}
+        >
+          <button
+            style={buttonStyle}
+            onClick={() => {
+              const eventCSV = document.getElementById("eventTextarea").value;
+              const userCSV = document.getElementById("userTextarea").value;
+              const { eventMap, userMap } = parseData(eventCSV);
+              setContent(
+                <Table
+                  title="Event Stats"
+                  data={
+                    parseDataDetails(userCSV, eventMap, userMap)["eventMap"]
+                  }
+                />
+              );
+            }}
+            children="View Event Data with Current Input"
+          />
+          <div>Items</div>
+        </div>
+      </div>
+    </React.Fragment>
+  );
+}
+Modal.defaultProps = {
+  // the black overlay effect for the modal
+  modalBackgroundStyle: {
+    display: "none",
+    position: "fixed",
+    zIndex: 1,
+    paddingTop: 100,
+    left: 0,
+    top: 0,
+    width: "100%",
+    height: "100%",
+    overflow: "auto",
+    backgroundColor: "rgba(0,0,0,0.6)"
+  },
+  // the white container for the modal
+  modalContentStyle: {
+    zIndex: 2,
+    backgroundColor: "#fefefe",
+    margin: "auto",
+    padding: "15px",
+    width: "90%",
+    overflow: "auto"
+  },
+  defaultStyle: {
+    overflow: "auto"
+  },
+  buttonStyle: {
+    backgroundColor: "white",
+    margin: 10,
+    padding: 7,
+    color: "#F15D24",
+    border: "1px solid #F15D24",
+    cursor: "pointer",
+    borderRadius: 6
+  },
+  // variable for when content doesn't need to
+  // be shown because its empty due to toggles
+  showButton: true
+};
+
+ReactDOM.render(
+  <Modal name="Add Your Data" showButton />,
+  document.getElementById("app")
+);
+
+// <Table title="User Stats" data={getData()["userMap"]} />
